@@ -1,13 +1,18 @@
 package goreloded
 
 func Solve(str string) string {
-	// clean 
+	// clean
 	str = CleanSpaces(str)
-	// ''
-	str = SingleQuotes(str)
 	// ,;
 	str = PunctuationMarks(str)
 	// ()
 	str = OrdersHandle(str)
+	// ,;
+	str = PunctuationMarks(str)
+	// ”
+	str = SingleQuotes(str)
+	// clean
+	str = CleanSpaces(str)
+
 	return str
 }
