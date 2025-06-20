@@ -2,9 +2,9 @@ package main
 
 import (
 	"fmt"
+	"goreloded"
 	"io"
 	"os"
-	"goreloded"
 )
 
 func main() {
@@ -21,6 +21,14 @@ func main() {
 		return
 	}
 	str := string(data)
-	fmt.Print(goreloded.Solve(str))
-	fmt.Println()
+	strL := goreloded.Solve(str)
+	res , errRs := os.Create(args[1])
+	if errRs != nil {
+		return
+	}
+	_ , errRf := res.WriteString(strL)
+	if errRf != nil {
+		return
+	}
+	fmt.Printf("%#v",strL)
 }
