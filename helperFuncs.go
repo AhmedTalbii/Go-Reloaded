@@ -2,6 +2,7 @@ package goreloded
 
 import (
 	"strings"
+	"unicode"
 )
 
 func Atoi(s string) int {
@@ -53,8 +54,20 @@ func DeletString(arr []string, i int) []string {
 }
 
 func Capitalize(str string) string {
-	arr := []rune(str)
-	return strings.ToUpper(string(arr[0])) + strings.ToLower(string(arr[1:])) 
+	if len(str) == 0 {
+		return str
+	}
+	runes := []rune(str)
+	start := false
+	for i := 0; i < len(runes); i++ {
+		if unicode.IsLetter(runes[i]) && !start {
+			runes[i] = unicode.ToUpper(runes[i])
+			start = true
+		} else {
+			runes[i] = unicode.ToLower(runes[i])
+		}
+	}
+	return string(runes)
 }
 
 func AddElement(s []rune,i int) []rune {
