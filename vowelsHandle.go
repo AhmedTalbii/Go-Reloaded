@@ -1,17 +1,17 @@
 package goreloded
 
-// import "strings"
-
-// func isVowel(str string) bool {
-
-// }
+import "strings"
 
 func VowelsHandle(str string) string {
-	// arr := strings.Fields(str)
-	// for i, w := range arr {
-	// 	if w == "a" || w == "A" &&  {
-
-	// 	}
-	// }
-	return str
+	lines := strings.Split(str, "\n")
+	for i := 0; i < len(lines); i++ {
+		arr := strings.Fields(lines[i])
+		for i := 0 ; i < len(arr)-1 ; i++ {
+			if arr[i] == "a" || arr[i] == "A" && isVowel(arr[i+1]) {
+				arr[i] = arr[i] + "n"
+			}
+		}
+		lines[i] = strings.Join(arr, " ")
+	}
+	return strings.Join(lines, "\n")
 }

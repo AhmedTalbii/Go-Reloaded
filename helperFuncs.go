@@ -89,3 +89,13 @@ func IsPunctuation(r rune) bool {
 	return (string(r) == "." || string(r) == "," || string(r) == "!" || string(r) == "?" || string(r) == ";" || string(r) == ":")
 }
 
+func isVowel(str string) bool {
+	if str == "" {
+		return false
+	}
+	v := rune(strings.ToLower(string(str[0]))[0])
+	if v == 'a' || v == 'e' || v == 'i' || v == 'o' || v == 'u' || v == 'h' {
+		return true
+	}
+	return false
+}

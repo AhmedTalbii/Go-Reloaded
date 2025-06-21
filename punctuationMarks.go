@@ -5,7 +5,7 @@ func PunctuationMarks(str string) string {
 	// befor
 	for i := 1; i < len(arr); i++ {
 		if IsPunctuation(arr[i]) {
-			if i-1 >= 0 && string(arr[i-1]) == " " && string(arr[i-2]) != ")" {
+			if i-1 >= 0 && string(arr[i-1]) == " " && string(arr[i-2]) != ")" && i != len(arr) - 1 {
 				arr = DeleteElement(arr, i-1)
 				i-=2
 			}
@@ -19,6 +19,11 @@ func PunctuationMarks(str string) string {
 		}
 	}
 
+	j := len(arr)-1
+	for arr[j-1] == ' ' && arr[j] == ',' {
+		arr = DeleteElement(arr, j-1)
+		j = len(arr)-1
+	}
 	
 	return string(arr)
 }

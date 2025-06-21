@@ -30,5 +30,5 @@ func main() {
 	if errRf != nil {
 		return
 	}
-	fmt.Printf("%#v",strL)
+	fmt.Println(strL)
 }
