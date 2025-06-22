@@ -1,11 +1,14 @@
 package goreloded
 
-func PunctuationMarks(str string) string {
+func PunctuationMarksAfterHandle(str string) string {
 	arr := []rune(str)
 	// befor
 	for i := 1; i < len(arr); i++ {
 		if IsPunctuation(arr[i]) {
-			if i-1 >= 0 && string(arr[i-1]) == " " && string(arr[i-2]) != ")" && i != len(arr) - 1 {
+			if i-1 >= 0 && string(arr[i-1]) == " " && string(arr[i-2]) == ")" && i != len(arr) - 1 {
+				arr = DeleteElement(arr, i-1)
+				i-=2
+			} else if i-1 >= 0 && string(arr[i-1]) == " " && string(arr[i-2]) != ")" && i != len(arr) - 1 {
 				arr = DeleteElement(arr, i-1)
 				i-=2
 			}

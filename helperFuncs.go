@@ -70,6 +70,20 @@ func Capitalize(str string) string {
 	return string(runes)
 }
 
+func AddString(s []string, i int, v string) []string {
+    res := make([]string, len(s)+1)
+    j := 0
+    for k := 0; k < len(res); k++ {
+        if k == i {
+            res[k] = v
+        } else {
+            res[k] = s[j]
+            j++
+        }
+    }
+    return res
+}
+
 func AddElement(s []rune,i int) []rune {
 	if i < 0 || i >= len(s) {
 		return s

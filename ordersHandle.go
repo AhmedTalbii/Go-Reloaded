@@ -5,9 +5,57 @@ import (
 	"strings"
 )
 
+func IsFlag(s string) bool {
+	baseFlags := []string{"(up)", "(low)", "(cap)", "(hex)", "(bin)"}
+	paramKeys := []string{"up", "low", "cap"}
+
+	for _, flag := range baseFlags {
+		if s == flag {
+			return true
+		}
+	}
+
+	if strings.HasPrefix(s, "(") && strings.HasSuffix(s, ")") {
+		content := strings.TrimSuffix(strings.TrimPrefix(s, "("), ")")
+		parts := strings.SplitN(content, ", ", 2)
+
+		if len(parts) == 2 {
+			flagName := strings.TrimSpace(parts[0])
+			numberStr := strings.TrimSpace(parts[1])
+
+			for _, key := range paramKeys {
+				if flagName == key {
+					if _, err := strconv.Atoi(numberStr); err == nil {
+						return true
+					}
+				}
+			}
+		}
+	}
+
+	return false
+}
+
+func cleanFlags(arr []string) []string {
+	for i := 0; i < len(arr); i++ {
+		for j := 0; j < len(arr[i])-1; j++ {
+			if arr[i][j] == ')' && arr[i][j+1] == ' ' {
+				str := strings.Fields(arr[i])
+				arr[i] = str[0]
+				arr = AddString(arr, i+1, str[1])
+			}
+		}
+	}
+	return arr
+}
+
 func applyOrders(arr []string) []string {
 	flagsNn := []string{"(hex)", "(bin)", "(up)", "(low)", "(cap)"}
 	flagsVn := []string{"(up, ", "(low, ", "(cap, "}
+	arr = cleanFlags(arr)
+	if len(cleanFlags(arr)) != len(arr) {
+		arr = cleanFlags(arr)
+	}
 	for i := 0; i < len(arr); i++ {
 		v := arr[i]
 		for i := 0; i < len(arr)-1; i++ {
@@ -21,9 +69,17 @@ func applyOrders(arr []string) []string {
 			if v == flag && i != 0 {
 				switch flag {
 				case "(hex)":
-					arr[i-1] = strconv.Itoa(HexBinToDec("0123456789abcdef", arr[i-1]))
+					if arr[i-1] != "" {
+						if nbr, err := strconv.ParseInt(arr[i-1], 16, 64); err == nil {
+							arr[i-1] = strconv.Itoa(int(nbr))
+						}
+					}
 				case "(bin)":
-					arr[i-1] = strconv.Itoa(HexBinToDec("01", arr[i-1]))
+					if arr[i-1] != "" {
+						if nbr, err := strconv.ParseInt(arr[i-1], 2, 64); err == nil {
+							arr[i-1] = strconv.Itoa(int(nbr))
+						}
+					}
 				case "(up)":
 					arr[i-1] = strings.ToUpper(arr[i-1])
 				case "(low)":
@@ -49,7 +105,7 @@ func applyOrders(arr []string) []string {
 				case "(up, ":
 					r := []rune(arr[i][len(flag) : len(v)-1])
 					nbr, err := strconv.Atoi(string(r))
-					if err != nil || nbr < 0 || len(r) == 0 {
+					if err != nil || len(r) == 0 {
 						if nbr != 9223372036854775807 {
 							continue
 						}
@@ -65,7 +121,7 @@ func applyOrders(arr []string) []string {
 				case "(low, ":
 					r := []rune(arr[i][len(flag) : len(v)-1])
 					nbr, err := strconv.Atoi(string(r))
-					if err != nil || nbr < 0 || len(r) == 0 {
+					if err != nil || len(r) == 0 {
 						if nbr != 9223372036854775807 {
 							continue
 						}
@@ -81,7 +137,7 @@ func applyOrders(arr []string) []string {
 				case "(cap, ":
 					r := []rune(arr[i][len(flag) : len(v)-1])
 					nbr, err := strconv.Atoi(string(r))
-					if err != nil || nbr < 0 || len(r) == 0 {
+					if err != nil || len(r) == 0 {
 						if nbr != 9223372036854775807 {
 							continue
 						}
@@ -131,7 +187,12 @@ func OrdersHandle(str string) string {
 		if len(word) > 0 {
 			words = append(words, word)
 		}
+
 		words = applyOrders(words)
+		if len(words) != 0 && IsFlag(words[0]) {
+			words = DeletString(words, 0)
+		}
+
 		finalLines = append(finalLines, strings.Join(words, " "))
 	}
 
