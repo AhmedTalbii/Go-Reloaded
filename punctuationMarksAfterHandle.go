@@ -5,10 +5,10 @@ func PunctuationMarksAfterHandle(str string) string {
 	// befor
 	for i := 1; i < len(arr); i++ {
 		if IsPunctuation(arr[i]) {
-			if i-1 >= 0 && string(arr[i-1]) == " " && string(arr[i-2]) == ")" && i != len(arr) - 1 {
+			if i-1 >= 0 && string(arr[i-1]) == " " && string(arr[i-2]) == ")" {
 				arr = DeleteElement(arr, i-1)
 				i-=2
-			} else if i-1 >= 0 && string(arr[i-1]) == " " && string(arr[i-2]) != ")" && i != len(arr) - 1 {
+			} else if i-1 >= 0 && string(arr[i-1]) == " " && string(arr[i-2]) != ")" {
 				arr = DeleteElement(arr, i-1)
 				i-=2
 			}
