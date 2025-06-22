@@ -1,6 +1,9 @@
 As Elton John said: ' I am the most well-known homosexual in the world ' (up, 4) qffg
 
 (hex) (bin)
+'    c   '    '__:' ghda l3id (bin) (bin) (bin )
 
-khh ,(cap, 1) ; gh
-khh ,(cap, fdfd) ; gh
+khh ,(cap, 1) ; gh  (cap,-2)
+khh ,(cap, fdfd) ; gh (cap,0)
+' :'
+' d'
