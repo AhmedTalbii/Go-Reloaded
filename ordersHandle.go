@@ -1,19 +1,13 @@
 package goreloded
 
 import (
+	"fmt"
 	"strconv"
 	"strings"
 )
 
-func IsFlag(s string) bool {
-	baseFlags := []string{"(up)", "(low)", "(cap)", "(hex)", "(bin)"}
+func IsFlagVn(s string) (bool, string, int) {
 	paramKeys := []string{"up", "low", "cap"}
-
-	for _, flag := range baseFlags {
-		if s == flag {
-			return true
-		}
-	}
 
 	if strings.HasPrefix(s, "(") && strings.HasSuffix(s, ")") {
 		content := strings.TrimSuffix(strings.TrimPrefix(s, "("), ")")
@@ -25,140 +19,116 @@ func IsFlag(s string) bool {
 
 			for _, key := range paramKeys {
 				if flagName == key {
-					if _, err := strconv.Atoi(numberStr); err == nil {
-						return true
+					if nbr, err := strconv.Atoi(numberStr); err == nil {
+						return true, key, nbr
+					} else {
+						fmt.Println(err)
 					}
 				}
 			}
 		}
 	}
 
-	return false
+	return false, "", -1
 }
 
-func cleanFlags(arr []string) []string {
-	for i := 0; i < len(arr); i++ {
-		for j := 0; j < len(arr[i])-1; j++ {
-			if arr[i][j] == ')' && arr[i][j+1] == ' ' {
-				str := strings.Fields(arr[i])
-				arr[i] = str[0]
-				arr = AddString(arr, i+1, str[1])
-			}
-		}
-	}
-	return arr
+func IsFlagNn(str string) bool {
+	return (str == "(hex)" || str == "(bin)" || str == "(up)" || str == "(low)" || str == "(cap)")
 }
 
 func applyOrders(arr []string) []string {
-	flagsNn := []string{"(hex)", "(bin)", "(up)", "(low)", "(cap)"}
-	flagsVn := []string{"(up, ", "(low, ", "(cap, "}
-	arr = cleanFlags(arr)
-	if len(cleanFlags(arr)) != len(arr) {
-		arr = cleanFlags(arr)
-	}
-	for i := 0; i < len(arr); i++ {
-		v := arr[i]
-		for i := 0; i < len(arr)-1; i++ {
-			if strings.HasPrefix(arr[i], "(") && strings.HasSuffix(arr[i], ",") && strings.HasSuffix(arr[i+1], ")") {
-				arr[i] = arr[i] + " " + arr[i+1]
-				arr = DeletString(arr, i+1)
-			}
-		}
-		// simple cases
-		for _, flag := range flagsNn {
-			if v == flag && i != 0 {
-				switch flag {
-				case "(hex)":
-					if arr[i-1] != "" {
-						if nbr, err := strconv.ParseInt(arr[i-1], 16, 64); err == nil {
-							arr[i-1] = strconv.Itoa(int(nbr))
-						}
-					}
-				case "(bin)":
-					if arr[i-1] != "" {
-						if nbr, err := strconv.ParseInt(arr[i-1], 2, 64); err == nil {
-							arr[i-1] = strconv.Itoa(int(nbr))
-						}
-					}
-				case "(up)":
-					arr[i-1] = strings.ToUpper(arr[i-1])
-				case "(low)":
-					arr[i-1] = strings.ToLower(arr[i-1])
-				case "(cap)":
-					if len(arr[i-1]) > 0 {
-						arr[i-1] = Capitalize(arr[i-1])
-					}
-				}
-
-				v = strings.ReplaceAll(v, flag, "")
-				arr[i] = v
-				if len(arr[i]) == 0 {
-					arr = DeletString(arr, i)
-					i = i - 1
-				}
-			}
-		}
-		// number cases
-		for _, flag := range flagsVn {
-			if len(string(v)) > len(flag) && flag == string(v[0:len(flag)]) && i != 0 {
-				switch flag {
-				case "(up, ":
-					r := []rune(arr[i][len(flag) : len(v)-1])
-					nbr, err := strconv.Atoi(string(r))
-					if err != nil || len(r) == 0 {
-						if nbr != 9223372036854775807 {
-							continue
-						}
-					}
-
-					start := i - nbr
-					if start < 0 {
-						start = 0
-					}
-					for j := i - 1; j >= start; j-- {
-						arr[j] = strings.ToUpper(arr[j])
-					}
-				case "(low, ":
-					r := []rune(arr[i][len(flag) : len(v)-1])
-					nbr, err := strconv.Atoi(string(r))
-					if err != nil || len(r) == 0 {
-						if nbr != 9223372036854775807 {
-							continue
-						}
-					}
-
-					start := i - nbr
-					if start < 0 {
-						start = 0
-					}
-					for j := i - 1; j >= start; j-- {
-						arr[j] = strings.ToLower(arr[j])
-					}
-				case "(cap, ":
-					r := []rune(arr[i][len(flag) : len(v)-1])
-					nbr, err := strconv.Atoi(string(r))
-					if err != nil || len(r) == 0 {
-						if nbr != 9223372036854775807 {
-							continue
-						}
-					}
-
-					start := i - nbr
-					if start < 0 {
-						start = 0
-					}
-					for j := i - 1; j >= start; j-- {
-						if len(arr[j]) > 0 {
-							arr[j] = Capitalize(arr[j])
-						}
-					}
-				}
-
-				arr = DeletString(arr, i)
-				i -= 1
-			}
+	// fix the flags
+	for i := 0; i < len(arr)-1; i++ {
+		if strings.HasPrefix(arr[i], "(") && strings.HasSuffix(arr[i], ",") && strings.HasSuffix(arr[i+1], ")") {
+			arr[i] = arr[i] + " " + arr[i+1]
+			arr = DeletString(arr, i+1)
 		}
 	}
+
+	counter := 0
+	for len(arr) > 0 && counter < len(arr) {
+		iFv, _, _ := IsFlagVn(arr[counter])
+
+		if !(IsFlagNn(arr[counter]) || iFv) && arr[counter] != "" {
+			break
+		}
+
+		if arr[counter] == "" {
+			counter++
+			continue
+		}
+		arr = DeletString(arr, counter)
+	}
+	// apply orders
+	for i := 1; i < len(arr); i++ {
+		br := false
+		if IsFlagNn(arr[i]) {
+			target := i - 1
+			for target >= 0 && strings.TrimSpace(arr[target]) == "" {
+				if target-1 < 0 {
+					br = true
+					break
+				}
+				target--
+			}
+			if br {
+				continue
+			}
+			switch arr[i] {
+			case "(hex)":
+				if arr[target] != "" {
+					if nbr, err := strconv.ParseInt(arr[target], 16, 64); err == nil {
+						arr[target] = strconv.Itoa(int(nbr))
+					}
+				}
+			case "(bin)":
+				if arr[target] != "" {
+					if nbr, err := strconv.ParseInt(arr[target], 2, 64); err == nil {
+						arr[target] = strconv.Itoa(int(nbr))
+					}
+				}
+			case "(up)":
+				arr[target] = strings.ToUpper(arr[target])
+			case "(low)":
+				arr[target] = strings.ToLower(arr[target])
+			case "(cap)":
+				if len(arr[target]) > 0 {
+					arr[target] = Capitalize(arr[target])
+				}
+			}
+			arr = DeletString(arr, i)
+			i -= 1
+		}
+		if bl, key, nbr := IsFlagVn(arr[i]); bl {
+			if nbr >= 0 {
+				start := i - nbr
+				if start < 0 {
+					start = 0
+				}
+				for j := i - 1; j >= start; j-- {
+					if arr[j] == "" {
+						if start-1 >= 0 {
+							start--
+						}
+					} else {
+						switch key {
+						case "up":
+							arr[j] = strings.ToUpper(arr[j])
+						case "low":
+							arr[j] = strings.ToLower(arr[j])
+						case "cap":
+							if len(arr[j]) > 0 {
+								arr[j] = Capitalize(arr[j])
+							}
+						}
+					}
+				}
+			}
+			arr = DeletString(arr, i)
+			i--
+		}
+	}
+
 	return arr
 }
 
@@ -166,33 +136,8 @@ func OrdersHandle(str string) string {
 	lines := strings.Split(str, "\n")
 	finalLines := []string{}
 	for _, line := range lines {
-		words := []string{}
-		word := ""
-		start := false
-		runes := []rune(line)
-		for i := 0; i < len(runes); i++ {
-			char := runes[i]
-
-			if char == ' ' && start && (i+2 >= len(runes) || runes[i+2] != ')') {
-				words = append(words, word)
-				word = ""
-				start = false
-			} else if char == ' ' && !start {
-				continue
-			} else {
-				word += string(char)
-				start = true
-			}
-		}
-		if len(word) > 0 {
-			words = append(words, word)
-		}
-
+		words := strings.Split(line, " ")
 		words = applyOrders(words)
-		if len(words) != 0 && IsFlag(words[0]) {
-			words = DeletString(words, 0)
-		}
-
 		finalLines = append(finalLines, strings.Join(words, " "))
 	}
 

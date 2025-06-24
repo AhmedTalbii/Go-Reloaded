@@ -5,10 +5,10 @@ import "strings"
 func VowelsHandle(str string) string {
 	lines := strings.Split(str, "\n")
 	for i := 0; i < len(lines); i++ {
-		arr := strings.Fields(lines[i])
-		for i := 0 ; i < len(arr)-1 ; i++ {
-			if arr[i] == "a" || arr[i] == "A" && isVowel(arr[i+1]) {
-				arr[i] = arr[i] + "n"
+		arr := strings.Split(lines[i]," ")
+		for j := 0 ; j < len(arr)-1 ; j++ {
+			if (arr[j] == "a" || arr[j] == "A") && isVowel(arr[j+1]) {
+				arr[j] = arr[j] + "n"
 			}
 		}
 		lines[i] = strings.Join(arr, " ")
